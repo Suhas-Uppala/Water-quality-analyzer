@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import joblib
 import plotly.graph_objects as go
+import plotly.express as px
 
 # Load the trained Random Forest model
 model = joblib.load('water_potability_model.pkl')
@@ -13,17 +14,32 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS with animations
+# Custom CSS with modern styling and animations
 st.markdown("""
 <style>
+    /* Color variables */
+    :root {
+        --primary-dark: #1a237e;
+        --primary: #3949ab;
+        --primary-light: #7986cb;
+        --accent: #00acc1;
+        --success: #4caf50;
+        --warning: #ff9800;
+        --danger: #f44336;
+        --background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+        --text-light: #ffffff;
+        --text-dark: #263238;
+    }
+
     /* Main container */
     .main {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        color: white;
+        background: var(--background);
+        color: var(--text-light);
+        min-height: 100vh;
         position: relative;
         overflow: hidden;
     }
-    
+
     /* Title styling */
     .title {
         text-align: center;
@@ -33,167 +49,129 @@ st.markdown("""
         font-size: 2.5em;
         animation: glow 2s ease-in-out infinite alternate;
     }
-    
+
     @keyframes glow {
-        from {
-            text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #0073e6;
-        }
-        to {
-            text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #0073e6;
-        }
+        from { text-shadow: 0 0 5px #fff, 0 0 10px var(--primary-light); }
+        to { text-shadow: 0 0 10px #fff, 0 0 20px var(--primary-light); }
     }
-    
+
     /* Input container styling */
     .input-container {
         background: rgba(255, 255, 255, 0.1);
-        padding: 2rem;
-        border-radius: 15px;
         backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 2rem;
         margin: 1rem 0;
-        animation: fadeIn 1s ease-out;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: fadeIn 0.5s ease-out;
     }
-    
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    
+
     /* Parameter card styling */
     .parameter-card {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 1rem;
-        border-radius: 10px;
-        margin: 0.5rem 0;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
         transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
-    
+
     .parameter-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        border-color: var(--accent);
     }
-    
-    /* Light beam animation */
-    .light-beam {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 200px;
-        background: linear-gradient(
-            to bottom,
-            rgba(255, 255, 255, 0) 0%,
-            rgba(255, 255, 255, 0.1) 50%,
-            rgba(255, 255, 255, 0) 100%
-        );
-        pointer-events: none;
-        z-index: -1;
-        animation: moveLight 8s linear infinite;
-    }
-    
-    @keyframes moveLight {
-        0% {
-            transform: translateY(-200px);
-        }
-        100% {
-            transform: translateY(100vh);
-        }
-    }
-    
-    /* Water drops animation */
-    .water-drop {
-        position: fixed;
-        pointer-events: none;
-        z-index: -1;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        animation: fall linear infinite;
-    }
-    
-    @keyframes fall {
-        0% { transform: translateY(-200px); opacity: 0; }
-        50% { opacity: 1; }
-        100% { transform: translateY(calc(100vh + 200px)); opacity: 0; }
-    }
-    
+
     /* Button styling */
     .stButton > button {
-        background: linear-gradient(45deg, #4CAF50, #45a049);
+        background: linear-gradient(45deg, var(--primary), var(--accent));
         color: white;
-        padding: 0.8rem 2rem;
+        padding: 1rem 2rem;
         border-radius: 25px;
         border: none;
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         transition: all 0.3s ease;
         width: 100%;
-        position: relative;
-        overflow: hidden;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
-    
+
     .stButton > button:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        background: linear-gradient(45deg, var(--accent), var(--primary));
     }
-    
-    /* Result box styling */
-    .result-box {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 2rem;
-        border-radius: 15px;
-        text-align: center;
-        margin-top: 2rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        animation: slideUp 0.5s ease-out;
+
+    /* Analysis grid styling */
+    .analysis-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
     }
-    
-    @keyframes slideUp {
-        from { 
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+
+    .analysis-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
     }
-    
-    /* Range indicator styling */
+
+    .analysis-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Meter styling */
+    .meter {
+        height: 10px;
+        background: #e0e0e0;
+        border-radius: 5px;
+        margin: 1rem 0;
+        overflow: hidden;
+    }
+
+    .meter-value {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+        border-radius: 5px;
+        transition: width 1s ease-in-out;
+    }
+
+    /* Range indicator */
     .range-indicator {
         font-size: 0.8em;
-        color: #a8c7ff;
+        color: rgba(255, 255, 255, 0.8);
         margin-top: 0.3rem;
     }
-</style>
 
-<div class="light-beam"></div>
-<script>
-    function createWaterDrops() {
-        const container = document.body;
-        for (let i = 0; i < 20; i++) {
-            const drop = document.createElement('div');
-            drop.className = 'water-drop';
-            drop.style.left = Math.random() * 100 + 'vw';
-            drop.style.animationDuration = (Math.random() * 2 + 1) + 's';
-            drop.style.animationDelay = Math.random() + 's';
-            container.appendChild(drop);
-        }
+    /* Water drop animation */
+    .water-drop {
+        position: fixed;
+        pointer-events: none;
+        z-index: -1;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+        animation: fall linear infinite;
     }
-    
-    function createLightBeam() {
-        const beam = document.createElement('div');
-        beam.className = 'light-beam';
-        document.body.appendChild(beam);
+
+    @keyframes fall {
+        0% { transform: translateY(-100vh) scale(0); opacity: 0; }
+        50% { transform: translateY(0) scale(1); opacity: 1; }
+        100% { transform: translateY(100vh) scale(0.5); opacity: 0; }
     }
-    
-    // Create effects when the page loads
-    window.addEventListener('load', () => {
-        createWaterDrops();
-        createLightBeam();
-    });
-</script>
+</style>
 """, unsafe_allow_html=True)
 
 # Helper function to create parameter input with scale
@@ -237,7 +215,7 @@ with col1:
         0.0, 14.0, 0.1,
         "6.5 - 8.5",
         "",
-        "pH indicates water's acidity or alkalinity. 7 is neutral."
+        "pH indicates water's acidity or alkalinity"
     )
     
     hardness = parameter_input(
@@ -313,11 +291,160 @@ with col2:
         "Measure of water clarity"
     )
 
+# Analyze button
+if st.button("Analyze Water Quality"):
+    # Progress bar animation
+    progress_bar = st.progress(0)
+    for i in range(100):
+        progress_bar.progress(i + 1)
+    
+    # Prepare input features
+    input_features = np.array([[
+        ph, hardness, solids, chloramines, sulfate,
+        conductivity, organic_carbon, trihalomethanes, turbidity
+    ]])
+    
+    # Make prediction
+    prediction = model.predict(input_features)
+    probability = model.predict_proba(input_features)
+    
+    # Create detailed analysis
+    st.markdown("""
+        <div class="analysis-grid">
+            <div class="analysis-card">
+                <h3>pH Analysis</h3>
+                <div class="meter">
+                    <div class="meter-value" style="width: {}%"></div>
+                </div>
+                <p>{}</p>
+            </div>
+            <div class="analysis-card">
+                <h3>Mineral Content</h3>
+                <div class="meter">
+                    <div class="meter-value" style="width: {}%"></div>
+                </div>
+                <p>{}</p>
+            </div>
+            <div class="analysis-card">
+                <h3>Contamination Risk</h3>
+                <div class="meter">
+                    <div class="meter-value" style="width: {}%"></div>
+                </div>
+                <p>{}</p>
+            </div>
+        </div>
+    """.format(
+        min(100, max(0, (ph - 6.5) / (8.5 - 6.5) * 100)),
+        "Optimal pH level" if 6.5 <= ph <= 8.5 else "pH level needs adjustment",
+        min(100, hardness / 180 * 100),
+        "Good mineral balance" if 60 <= hardness <= 180 else "Mineral content needs adjustment",
+        100 - (probability[0][1] * 100),
+        "Low contamination risk" if probability[0][1] > 0.7 else "Moderate to high contamination risk"
+    ), unsafe_allow_html=True)
+    
+    # Create gauge chart
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=probability[0][1] * 100,
+        domain={'x': [0, 1], 'y': [0, 1]},
+        title={'text': "Water Quality Score", 'font': {'size': 24, 'color': '#2a3f5f'}},
+        gauge={
+            'axis': {'range': [0, 100], 'tickwidth': 1},
+            'bar': {'color': "#0288d1"},
+            'bgcolor': "white",
+            'borderwidth': 2,
+            'bordercolor': "gray",
+            'steps': [
+                {'range': [0, 40], 'color': '#ff9800'},
+                {'range': [40, 70], 'color': '#4caf50'},
+                {'range': [70, 100], 'color': '#2196f3'}
+            ],
+        }
+    ))
+    
+    fig.update_layout(
+        height=300,
+        font={'color': "#2a3f5f", 'family': "Arial"}
+    )
+    
+    st.plotly_chart(fig)
+
+    # Add result statement block
+    result_color = "#4caf50" if prediction[0] == 1 else "#f44336"
+    result_text = "✅ WATER IS POTABLE" if prediction[0] == 1 else "❌ WATER IS NOT POTABLE"
+    result_description = (
+        "This water sample meets the WHO and EPA safety standards for drinking water based on the analyzed parameters. "
+        "Regular monitoring is still recommended to maintain water quality."
+        if prediction[0] == 1 else 
+        "This water sample does not meet the safety standards for drinking water. "
+        "Treatment or filtration is recommended before consumption."
+    )
+    
+    recommendations = []
+    if ph < 6.5 or ph > 8.5:
+        recommendations.append("Adjust pH levels to be between 6.5 and 8.5")
+    if hardness > 180:
+        recommendations.append("Consider using a water softener")
+    if solids > 1500:
+        recommendations.append("Install a reverse osmosis system to reduce dissolved solids")
+    if chloramines > 4:
+        recommendations.append("Reduce chloramine levels through filtration")
+    if turbidity > 5:
+        recommendations.append("Use a sediment filter to improve water clarity")
+
+    recommendation_html = ""
+    if recommendations:
+        recommendation_html = """
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                <h4 style="color: #666;">Recommendations:</h4>
+                <ul style="color: #666; padding-left: 1.5rem;">
+                    {}
+                </ul>
+            </div>
+        """.format("".join(f"<li>{r}</li>" for r in recommendations))
+
+    st.markdown(f"""
+        <div style="
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 2rem 0;
+            border-left: 5px solid {result_color};
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: slideUp 0.5s ease-out;
+        ">
+            <h2 style="
+                color: {result_color};
+                margin-bottom: 1rem;
+                font-size: 2em;
+                font-weight: bold;
+            ">{result_text}</h2>
+            <p style="
+                color: #333;
+                font-size: 1.2em;
+                line-height: 1.5;
+                margin: 1rem 0;
+            ">{result_description}</p>
+            <div style="
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid #eee;
+                color: #666;
+            ">
+                <span style="font-size: 1.1em;">Confidence Score: 
+                    <strong style="color: {result_color}">{probability[0][1]*100:.1f}%</strong>
+                </span>
+            </div>
+            {recommendation_html}
+        </div>
+    """, unsafe_allow_html=True)
+
 # Add parameter guide
 st.markdown("""
     <div class="input-container">
         <h3>📊 Parameter Guide</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div class="analysis-grid">
             <div class="parameter-card">
                 <h4>pH Level</h4>
                 <ul>
@@ -345,65 +472,3 @@ st.markdown("""
         </div>
     </div>
 """, unsafe_allow_html=True)
-
-# Analyze button
-if st.button("Analyze Water Quality"):
-    # Progress bar animation
-    progress_bar = st.progress(0)
-    for i in range(100):
-        progress_bar.progress(i + 1)
-    
-    # Prepare input features
-    input_features = np.array([[
-        ph, hardness, solids, chloramines, sulfate,
-        conductivity, organic_carbon, trihalomethanes, turbidity
-    ]])
-    
-    # Make prediction
-    prediction = model.predict(input_features)
-    probability = model.predict_proba(input_features)
-    
-    # Determine result styling
-    if prediction[0] == 1:
-        result_color = "#4CAF50"
-        result_text = "Potable"
-        result_emoji = "✅"
-        message = "The water appears to be safe for consumption."
-    else:
-        result_color = "#f44336"
-        result_text = "Not Potable"
-        result_emoji = "⚠️"
-        message = "The water may not be safe for consumption without treatment."
-    
-    # Display result
-    st.markdown(f"""
-        <div class="result-box" style="border: 2px solid {result_color} background-color: blue">
-            <h2 style="color: {result_color}">Water Quality Result {result_emoji}</h2>
-            <h3>The water is <span style="color: {result_color}; font-weight: bold">{result_text}</span></h3>
-            <p style="font-size: 1.1em;">{message}</p>
-            <p>Confidence: {probability[0][prediction[0]]:.2%}</p>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # Create gauge chart
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=probability[0][prediction[0]] * 100,
-        domain={'x': [0, 1], 'y': [0, 1]},
-        title={'text': "Prediction Confidence", 'font': {'size': 24}},
-        gauge={
-            'axis': {'range': [0, 100], 'tickwidth': 1},
-            'bar': {'color': result_color},
-            'bgcolor': "white",
-            'borderwidth': 2,
-            'bordercolor': "gray",
-            'steps': [
-                {'range': [0, 50], 'color': 'lightgray'},
-                {'range': [50, 75], 'color': 'gray'},
-                {'range': [75, 100], 'color': 'darkgray'}
-            ],
-        }
-    ))
-    
-    fig.update_layout(height=300)
-    st.plotly_chart(fig)
