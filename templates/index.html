@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Potability Prediction</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>Water Potability Prediction</h1>
+    <form action="/predict" method="POST">
+        <label for="ph">pH:</label>
+        <input type="number" name="ph" step="0.1" required><br>
+        <label for="hardness">Hardness:</label>
+        <input type="number" name="hardness" step="0.1" required><br>
+        <label for="solids">Solids:</label>
+        <input type="number" name="solids" step="0.1" required><br>
+        <label for="chloramines">Chloramines:</label>
+        <input type="number" name="chloramines" step="0.1" required><br>
+        <label for="sulfate">Sulfate:</label>
+        <input type="number" name="sulfate" step="0.1" required><br>
+        <label for="conductivity">Conductivity:</label>
+        <input type="number" name="conductivity" step="0.1" required><br>
+        <label for="organic_carbon">Organic Carbon:</label>
+        <input type="number" name="organic_carbon" step="0.1" required><br>
+        <label for="trihalomethanes">Trihalomethanes:</label>
+        <input type="number" name="trihalomethanes" step="0.1" required><br>
+        <label for="turbidity">Turbidity:</label>
+        <input type="number" name="turbidity" step="0.1" required><br>
+        <button type="submit">Analyze</button>
+    </form>
+</body>
+</html>
