@@ -1,0 +1,1 @@
+this repo represents the user interface for the user to give the inputs of the water reading and the user can see the water potability and the analysis of the water.
